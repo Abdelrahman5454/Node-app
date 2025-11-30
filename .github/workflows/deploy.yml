@@ -12,17 +12,19 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Deploy dev app
-        working-directory: /home/runner/fullstack-app
+      - name: Deploy dev app using image only
         run: |
           echo "Pulling latest Docker image for dev..."
-          docker pull abdo02/fullstack-app:dev || echo "Dev tag not found, using latest"
-          
-          echo "Stopping old dev containers..."
-          docker compose -p fullstack-app-dev down --remove-orphans
-          
-          echo "Starting dev containers on port 3001..."
-          docker compose -p fullstack-app-dev up -d --force-recreate
-          
-          echo "Cleaning up old images..."
+          docker pull abdo02/fullstack-app:latest
+
+          echo "Stopping old dev container..."
+          docker rm -f fullstack-app-dev || true
+
+          echo "Starting dev container on port 3001..."
+          docker run -d \
+            --name fullstack-app-dev \
+            -p 3001:3000 \
+            abdo02/fullstack-app:latest
+
+          echo "Cleaning up unused images..."
           docker image prune -f
