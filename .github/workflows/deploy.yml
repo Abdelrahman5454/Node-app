@@ -1,29 +1,33 @@
-name: Deploy Fullstack App
+name: Deploy Fullstack App (Dev)
 
+# Trigger only on pushes to dev branch
 on:
   push:
     branches:
-      - main
+      - dev
 
 jobs:
-  deploy:
-    runs-on: self-hosted  # your local/self-hosted runner
+  deploy-dev:
+    runs-on: self-hosted  # your self-hosted runner
 
     steps:
+      # 1️⃣ Checkout the dev branch code
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Deploy app
+      # 2️⃣ Deploy dev app
+      - name: Deploy dev app
         working-directory: /home/runner/fullstack-app
         run: |
-          echo "Pulling latest Docker image..."
-          docker pull abdo02/fullstack-app:latest
-
-          echo "Stopping old containers..."
-          docker compose down --remove-orphans
-
-          echo "Starting new containers..."
-          docker compose up -d --force-recreate
-
+          echo "Pulling latest Docker image for dev..."
+          docker pull abdo02/fullstack-app:dev || echo "Dev tag not found, using latest"
+          
+          echo "Stopping old dev containers..."
+          docker compose -p fullstack-app-dev down --remove-orphans
+          
+          echo "Starting dev containers on port 3001..."
+          # make sure docker-compose.yml maps dev container to port 3001:3000
+          docker compose -p fullstack-app-dev up -d --force-recreate
+          
           echo "Cleaning up old images..."
           docker image prune -f
