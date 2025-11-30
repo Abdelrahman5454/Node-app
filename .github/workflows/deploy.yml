@@ -1,6 +1,5 @@
 name: Deploy Fullstack App (Dev)
 
-# Trigger only on pushes to dev branch
 on:
   push:
     branches:
@@ -8,14 +7,11 @@ on:
 
 jobs:
   deploy-dev:
-    runs-on: self-hosted  # your self-hosted runner
+    runs-on: self-hosted
 
     steps:
-      # 1️⃣ Checkout the dev branch code
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-      # 2️⃣ Deploy dev app
       - name: Deploy dev app
         working-directory: /home/runner/fullstack-app
         run: |
@@ -26,7 +22,6 @@ jobs:
           docker compose -p fullstack-app-dev down --remove-orphans
           
           echo "Starting dev containers on port 3001..."
-          # make sure docker-compose.yml maps dev container to port 3001:3000
           docker compose -p fullstack-app-dev up -d --force-recreate
           
           echo "Cleaning up old images..."
