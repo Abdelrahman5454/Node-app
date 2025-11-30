@@ -1,29 +1,30 @@
-name: Deploy Fullstack App
+name: Deploy Fullstack App (Main)
 
 on:
   push:
     branches:
-      - main
+      - main  # Trigger only on main branch
 
 jobs:
-  deploy:
-    runs-on: self-hosted  # your local/self-hosted runner
+  deploy-main:
+    runs-on: self-hosted
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-      - name: Deploy app
-        working-directory: /home/runner/fullstack-app
+      - name: Deploy main app using image only
         run: |
-          echo "Pulling latest Docker image..."
+          echo "Pulling latest Docker image for main..."
           docker pull abdo02/fullstack-app:latest
 
-          echo "Stopping old containers..."
-          docker compose down --remove-orphans
+          echo "Stopping old main container..."
+          docker rm -f fullstack-app-main || true
 
-          echo "Starting new containers..."
-          docker compose up -d --force-recreate
+          echo "Starting main container on port 3000..."
+          docker run -d \
+            --name fullstack-app-main \
+            -p 3000:3000 \
+            abdo02/fullstack-app:latest
 
-          echo "Cleaning up old images..."
+          echo "Cleaning up unused images..."
           docker image prune -f
